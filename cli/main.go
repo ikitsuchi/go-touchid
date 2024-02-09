@@ -3,11 +3,11 @@ package main
 import (
 	"log"
 
-	touchid "github.com/lox/go-touchid"
+	touchid "github.com/ikitsuchi/go-touchid"
 )
 
 func main() {
-	ok, err := touchid.Authenticate("access llamas")
+	ok, err := touchid.Authenticate("access llamas", "cancel", "fallback")
 	if err != nil {
 		log.Fatal(err)
 	}

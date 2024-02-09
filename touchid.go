@@ -7,12 +7,20 @@ package touchid
 #include <stdio.h>
 #import <LocalAuthentication/LocalAuthentication.h>
 
-int Authenticate(char const* reason) {
+int Authenticate(char const* reason, char const* cancel_title, char const* fallback_title) {
   LAContext *myContext = [[LAContext alloc] init];
   NSError *authError = nil;
   dispatch_semaphore_t sema = dispatch_semaphore_create(0);
   NSString *nsReason = [NSString stringWithUTF8String:reason];
   __block int result = 0;
+
+  if (cancel_title != NULL) {
+    myContext.localizedCancelTitle = [NSString stringWithUTF8String:cancel_title];
+  }
+
+  if (fallback_title != NULL) {
+    myContext.localizedFallbackTitle = [NSString stringWithUTF8String:fallback_title];
+  }
 
   if ([myContext canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics error:&authError]) {
     [myContext evaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics
@@ -51,11 +59,15 @@ var (
 	ErrUserFallback = errors.New("user fallback")
 )
 
-func Authenticate(reason string) (bool, error) {
+func Authenticate(reason string, cancel_title string, fallback_title string) (bool, error) {
 	reasonStr := C.CString(reason)
+	cancel_titleStr := C.CString(cancel_title)
+	fallback_titleStr := C.CString(fallback_title)
 	defer C.free(unsafe.Pointer(reasonStr))
+	defer C.free(unsafe.Pointer(cancel_titleStr))
+	defer C.free(unsafe.Pointer(fallback_titleStr))
 
-	result := C.Authenticate(reasonStr)
+	result := C.Authenticate(reasonStr, cancel_titleStr, fallback_titleStr)
 	switch result {
 	case 1:
 		return true, nil

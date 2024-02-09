@@ -4,22 +4,22 @@
 package main
 
 import (
-  "log"
+	"log"
 
-  touchid "github.com/lox/go-touchid"
+	touchid "github.com/ikitsuchi/go-touchid"
 )
 
 func main() {
-  ok, err := touchid.Authenticate("access llamas")
-  if err != nil {
-    log.Fatal(err)
-  }
+	ok, err := touchid.Authenticate("access llamas", "cancel", "fallback")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-  if ok {
-    log.Printf("Authenticated")
-  } else {
-    log.Fatal("Failed to authenticate")
-  }
+	if ok {
+		log.Printf("Authenticated")
+	} else {
+		log.Fatal("Failed to authenticate")
+	}
 }
 ```
 
