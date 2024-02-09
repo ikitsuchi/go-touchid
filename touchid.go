@@ -21,7 +21,13 @@ int Authenticate(char const* reason) {
         if (success) {
           result = 1;
         } else {
-          result = 2;
+          if (error.code == kLAErrorUserCancel) {
+            result = 3;
+          } else if (error.code == kLAErrorUserFallback) {
+            result = 4;
+          } else {
+            result = 2;
+          }
         }
         dispatch_semaphore_signal(sema);
       }];
@@ -40,6 +46,11 @@ import (
 	"unsafe"
 )
 
+var (
+	ErrUserCancel   = errors.New("user cancel")
+	ErrUserFallback = errors.New("user fallback")
+)
+
 func Authenticate(reason string) (bool, error) {
 	reasonStr := C.CString(reason)
 	defer C.free(unsafe.Pointer(reasonStr))
@@ -50,6 +61,10 @@ func Authenticate(reason string) (bool, error) {
 		return true, nil
 	case 2:
 		return false, nil
+	case 3:
+		return false, ErrUserCancel
+	case 4:
+		return false, ErrUserFallback
 	}
 
 	return false, errors.New("Error occurred accessing biometrics")
